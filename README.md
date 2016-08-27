@@ -2,7 +2,14 @@
 
 [![Build Status](https://travis-ci.org/tomasc/object_state.svg)](https://travis-ci.org/tomasc/object_state) [![Gem Version](https://badge.fury.io/rb/object_state.svg)](http://badge.fury.io/rb/object_state) [![Coverage Status](https://img.shields.io/coveralls/tomasc/object_state.svg)](https://coveralls.io/r/tomasc/object_state)
 
-Encapsulates object's state, converts from/to params and to cache_key.
+This gem helps to encapsulate state of objects of (typically) Ruby on Rails applications.
+
+* The state becomes easy to identify in the source code.
+* There is a standard method for converting the state to and from query params.
+* The state can be expressed in the form of a `cache_key`.
+* It is possible to additionally typecast and/or validate its attributes.
+
+Useful for pagination, filtering etc.
 
 ## Installation
 
@@ -14,15 +21,105 @@ gem 'object_state'
 
 And then execute:
 
-    $ bundle
+```
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install object_state
+```
+$ gem install object_state
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Encapsulate object's state
+
+```ruby
+class MyObj
+  include ObjectState
+
+  object_state do
+    attr_accessor :current_date
+  end
+end
+```
+
+### Export state hash
+
+```ruby
+my_obj.to_object_state_hash # => { my_obj => { id: "123", current_date: "2016-08-27" } }
+```
+
+This hash can be easily used as query params, for example:
+
+```ruby
+my_obj_path(my_obj, my_obj.to_object_state_hash)
+```
+
+An attribute can be easily overridden:
+
+```ruby
+my_obj_path(my_obj, my_obj.to_object_state_hash(current_date: Date.tomorow))
+```
+
+### Assign values from state hash
+
+```ruby
+my_obj.assign_attributes_from_object_state_hash(…)
+```
+
+The attributes will be assigned only if the id in the state hash matches the id of your object. This is helpful for example when used in controllers.
+
+## Advanced usage
+
+Optionally the state can be processed by a custom class. This is useful when the values need to be typecast, validated, or transformed. The `ObjectState::State` includes `ActiveModel::Model` and `Virtus` so you can use [Virtus' attribute definition](https://github.com/solnic/virtus) and [ActiveModel validations](http://api.rubyonrails.org/classes/ActiveModel/Validations.html). For example:
+
+```ruby
+class MyObj::State < ObjectState::State
+  attribute :current_date, Date
+
+  validates :current_date, inclusion: { in: Date.today..Date.tomorrow }, presence: true
+end
+```
+
+Only valid values will be assigned to your object.
+
+```ruby
+class MyObj
+  include ObjectState
+
+  object_state class_name: 'MyObj::State' do
+    attr_accessor :current_date
+  end
+end
+```
+
+## Cache
+
+Often values or views associated with the object need to be cached (and the cache expired) depending on its state. The `:object_state_cache_key` generates a cache key based on the state's values. For example the `MyObj` from the above example:
+
+```ruby
+my_obj.object_state_cache_key # => '2016-08-27'
+```
+
+In fact the `object_state` method automatically merges the state object's cache key with the object's cache_key:
+
+```ruby
+my_obj.cache_key # => 'object-cache-key/2016-08-27'
+```
+
+This can be disabled as follows:
+
+```ruby
+class MyObj
+  include ObjectState
+
+  object_state merge_cache_key: false do
+    attr_accessor :current_date
+  end
+end
+```
 
 ## Development
 
@@ -32,8 +129,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/tomasc/object_state.
-
+Bug reports and pull requests are welcome on GitHub at <https://github.com/tomasc/object_state>.
 
 ## License
 
