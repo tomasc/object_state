@@ -106,7 +106,7 @@ my_obj.object_state_cache_key # => '2016-08-27'
 In fact the `object_state` method automatically merges the state object's cache key with the object's cache_key:
 
 ```ruby
-my_obj.cache_key # => 'object-cache-key/2016-08-27'
+my_obj.cache_key # => '<object-cache-key>/2016-08-27'
 ```
 
 This can be disabled as follows:
