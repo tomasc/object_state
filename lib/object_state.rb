@@ -1,5 +1,4 @@
-require "object_state/version"
+require 'object_state/owner'
+require 'object_state/state'
 
-module ObjectState
-  # Your code goes here...
-end
+require 'object_state/version'
