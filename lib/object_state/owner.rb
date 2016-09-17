@@ -4,9 +4,6 @@ module ObjectState
   module Owner
     extend ActiveSupport::Concern
 
-    included do
-    end
-
     module ClassMethods
       def object_state_class
         @@object_state_class
@@ -15,7 +12,9 @@ module ObjectState
       def object_state(options = {}, &block)
         @@object_state_class = Class.new(ObjectState::State)
         @@object_state_class.class_eval do
-          instance_eval(&block)
+          setup_attributes do
+            instance_eval(&block)
+          end
         end
 
         instance_eval(&block)

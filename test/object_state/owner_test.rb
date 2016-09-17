@@ -21,4 +21,7 @@ describe ObjectState::Owner do
 
   describe 'Mongoid class' do
   end
+
+  describe 'custom State class' do
+  end
 end

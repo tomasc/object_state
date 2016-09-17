@@ -7,6 +7,28 @@ describe ObjectState::State do
 
   it { subject.must_respond_to :model }
 
+  describe '.setup_attributes' do
+    describe 'attr_accessor' do
+      before do
+        ObjectState::State.setup_attributes do
+          attr_accessor :current_date
+        end
+      end
+
+      it 'must create String attribute' do
+        subject.class.attribute_names.must_equal [:current_date]
+      end
+    end
+
+    describe 'Mongoid fields' do
+
+    end
+
+    describe 'Virtus attributes' do
+
+    end
+  end
+
   describe '#initialize' do
     it { subject.model.must_equal model }
   end
