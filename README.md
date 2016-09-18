@@ -37,7 +37,7 @@ $ gem install object_state
 
 ```ruby
 class MyObj
-  include ObjectState
+  include ObjectState::Owner
 
   object_state do
     attr_accessor :current_date
@@ -87,7 +87,7 @@ Only valid values will be assigned to your object.
 
 ```ruby
 class MyObj
-  include ObjectState
+  include ObjectState::Owner
 
   object_state class_name: 'MyObj::State' do
     attr_accessor :current_date
@@ -113,7 +113,7 @@ This can be disabled as follows:
 
 ```ruby
 class MyObj
-  include ObjectState
+  include ObjectState::Owner
 
   object_state merge_cache_key: false do
     attr_accessor :current_date
