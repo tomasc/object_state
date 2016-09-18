@@ -71,6 +71,12 @@ my_obj.assign_attributes_from_object_state_hash(…)
 
 The attributes will be assigned only if the id in the state hash matches the id of your object. This is helpful for example when used in controllers.
 
+## Supported attribute definitions
+
+* PoRo (`attr_accessor`)
+* Mongoid fields
+* Virtus attributes
+
 ## Advanced usage
 
 Optionally the state can be processed by a custom class. This is useful when the values need to be typecast, validated, or transformed. The `ObjectState::State` includes `ActiveModel::Model` and `Virtus` so you can use [Virtus' attribute definition](https://github.com/solnic/virtus) and [ActiveModel validations](http://api.rubyonrails.org/classes/ActiveModel/Validations.html). For example:
