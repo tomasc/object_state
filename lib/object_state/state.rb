@@ -3,6 +3,8 @@ require 'virtus'
 
 module ObjectState
   class State
+    class UnsupportedAttributeType < StandardError; end
+
     include ActiveModel::Model
     include ActiveSupport::Rescuable
     include Virtus.model(nullify_blank: true)
@@ -15,23 +17,69 @@ module ObjectState
       attribute_set.map(&:name)
     end
 
-    def self.setup_attributes(&block)
-      # TODO: if original is Mongoid
-      # TODO: if original is Virtus
-      # if original is PoRo
+    def self.setup_attributes(owner_class, &block)
       temp_class = Class.new(Object)
-      default_public_methods = temp_class.new.public_methods
-      temp_class.class_eval { instance_eval(&block) }
-      (temp_class.new.public_methods - default_public_methods).reject { |name| name.to_s.end_with?('=') }.each do |name|
-        attribute name, String
+
+      # override attr_accessor to collect attr_accessor :names
+      temp_class.define_singleton_method :attr_accessor do |*names|
+        @attr_accessor_names ||= []
+        @attr_accessor_names.concat Array(names)
+        super(*names)
       end
 
-      instance_eval(&block)
+      temp_class.define_singleton_method :attr_accessor_names do
+        Array(@attr_accessor_names)
+      end
+
+      is_mongoid_document = !!defined?(::Mongoid::Document) && owner_class.ancestors.include?(::Mongoid::Document)
+      is_virtus_model = owner_class.respond_to?(:attribute_set) # FIXME: is there a better way to check for virtus?
+
+      temp_class.class_eval do
+        include ::Mongoid::Document if is_mongoid_document
+        include Virtus.model if is_virtus_model
+        instance_eval(&block)
+      end
+
+      # setup attributes for :attr_accessor names
+      excluded_attr_accessor_names = %i(validation_context _index before_callback_halted)
+      (temp_class.attr_accessor_names - excluded_attr_accessor_names).each do |name|
+        attribute name
+      end
+
+      # setup attributes for Mongoid fields
+      temp_class.fields.except(*%w(_id)).each { |name, field| attribute name, field.type } if is_mongoid_document
+
+      # setup attributes for Virtus attributes
+      temp_class.attribute_set.each { |att| attribute att.name, att.type } if is_virtus_model
+
+      owner_class.class_eval do
+        instance_eval(&block)
+      end
     end
 
     def initialize(model, attrs = {})
       self.model = model
       super attributes_from_model.merge(attrs)
+    end
+
+    def update_model!(options = {})
+      return unless model.present?
+      return unless valid? || options[:skip_validations] == true
+      attributes.except(:id).each do |name, value|
+        model.send("#{name}=", value) if model.respond_to?(name)
+      end
+    end
+
+    def to_hash
+      return unless model.present?
+      key = model.respond_to?(:model_name) ? model.model_name.singular : model.class.to_s.underscore
+      value = super
+      value = value.merge(id: model.id) if model.respond_to?(:id)
+      { key => value }
+    end
+
+    def cache_key
+      attributes.values.flatten.map(&:to_s).reject(&:blank?).join('/')
     end
 
     private

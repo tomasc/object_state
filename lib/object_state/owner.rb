@@ -6,18 +6,15 @@ module ObjectState
 
     module ClassMethods
       def object_state_class
-        @@object_state_class
+        @object_state_class ||= Class.new(ObjectState::State)
       end
 
       def object_state(options = {}, &block)
-        @@object_state_class = Class.new(ObjectState::State)
-        @@object_state_class.class_eval do
-          setup_attributes do
-            instance_eval(&block)
-          end
+        cls = self
+        @object_state_class = Class.new(ObjectState::State)
+        @object_state_class.class_eval do
+          setup_attributes cls, &block
         end
-
-        instance_eval(&block)
       end
     end
 
