@@ -43,18 +43,27 @@ module ObjectState
       # setup attributes for :attr_accessor names
       excluded_attr_accessor_names = %i(validation_context _index before_callback_halted)
       (temp_class.attr_accessor_names - excluded_attr_accessor_names).each do |name|
+        next if attribute_set.map(&:name).include?(name.to_sym)
         attribute name
       end
 
       # setup attributes for Mongoid fields
-      temp_class.fields.except(*%w(_id)).each { |name, field| attribute name, field.type } if is_mongoid_document
+      if is_mongoid_document
+        temp_class.fields.except(*%w(_id)).each do |name, field|
+          next if attribute_set.map(&:name).include?(name.to_sym)
+          attribute name, field.type
+        end
+      end
 
       # setup attributes for Virtus attributes
-      temp_class.attribute_set.each { |att| attribute att.name, att.type } if is_virtus_model
-
-      owner_class.class_eval do
-        instance_eval(&block)
+      if is_virtus_model
+        temp_class.attribute_set.each do |att|
+          next if attribute_set.map(&:name).include?(att.name.to_sym)
+          attribute att.name, att.type
+        end
       end
+
+      owner_class.class_eval(&block)
     end
 
     def initialize(model, attrs = {})
@@ -70,11 +79,12 @@ module ObjectState
       end
     end
 
-    def to_hash
+    def to_hash(attrs = {})
       return unless model.present?
       key = model.respond_to?(:model_name) ? model.model_name.singular : model.class.to_s.underscore
-      value = super
+      value = super()
       value = value.merge(id: model.id) if model.respond_to?(:id)
+      value = value.merge(attrs)
       { key => value }
     end
 

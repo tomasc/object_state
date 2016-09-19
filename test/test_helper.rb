@@ -40,3 +40,22 @@ class VirtusDoc
     attribute :number, Integer
   end
 end
+
+class CustomStateOwner
+  include Mongoid::Document
+  include ObjectState::Owner
+
+  class State < ObjectState::State
+    attribute :title, String
+    validates :title, presence: true
+
+    def title
+      return if super.nil?
+      super.downcase
+    end
+  end
+
+  object_state class_name: 'CustomStateOwner::State' do
+    field :title, type: String
+  end
+end

@@ -103,31 +103,40 @@ describe ObjectState::State do
   describe '#to_hash' do
     describe 'PoRo' do
       let(:current_date) { Date.today }
+      let(:date_tomorrow) { Date.tomorrow }
       let(:model) { PoRoDoc.new(current_date) }
       let(:state) { model.object_state }
 
-      it 'returns has suitable for inclusion in params' do
-        state.to_hash.must_equal(model.class.to_s.underscore => { current_date: current_date })
+      it { state.to_hash.must_equal(model.class.to_s.underscore => { current_date: current_date }) }
+
+      describe 'with attr overrides' do
+        it { state.to_hash(current_date: date_tomorrow).must_equal(model.class.to_s.underscore => { current_date: date_tomorrow }) }
       end
     end
 
     describe 'Mongoid' do
       let(:title) { 'Foo' }
+      let(:new_title) { 'Bar' }
       let(:model) { MongoidDoc.new(title: title) }
       let(:state) { model.object_state }
 
-      it 'returns has suitable for inclusion in params' do
-        state.to_hash.must_equal(model.model_name.singular => { id: model.id, title: title })
+      it { state.to_hash.must_equal(model.model_name.singular => { id: model.id, title: title }) }
+
+      describe 'with attr overrides' do
+        it { state.to_hash(title: new_title).must_equal(model.model_name.singular => { id: model.id, title: new_title }) }
       end
     end
 
     describe 'Virtus' do
       let(:number) { 1 }
+      let(:new_number) { 2 }
       let(:model) { VirtusDoc.new(number: number) }
       let(:state) { model.object_state }
 
-      it 'returns has suitable for inclusion in params' do
-        state.to_hash.must_equal(model.class.to_s.underscore => { number: number })
+      it { state.to_hash.must_equal(model.class.to_s.underscore => { number: number }) }
+
+      describe 'with attr overrides' do
+        it { state.to_hash(number: new_number).must_equal(model.class.to_s.underscore => { number: new_number }) }
       end
     end
   end
