@@ -30,7 +30,7 @@ module ObjectState
       self.class.object_state_class.new(self, attrs)
     end
 
-    def to_state_hash(attrs = {})
+    def to_object_state_hash(attrs = {})
       object_state(attrs).try(:to_hash)
     end
 

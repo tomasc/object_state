@@ -23,6 +23,10 @@ describe ObjectState::Owner do
         model.current_date.must_equal date_tomorrow
       end
     end
+
+    describe '#to_object_state_hash' do
+      it { model.must_respond_to :to_object_state_hash }
+    end
   end
 
   describe 'Mongoid' do
