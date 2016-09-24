@@ -12,7 +12,7 @@ module ObjectState
       def object_state(options = {}, &block)
         cls = self
         class_name = options.fetch(:class_name, nil)
-        @object_state_class = class_name ? class_name.constantize : Class.new(ObjectState::State)
+        @object_state_class ||= class_name ? class_name.constantize : Class.new(ObjectState::State)
         @object_state_class.class_eval do
           setup_attributes cls, &block
         end

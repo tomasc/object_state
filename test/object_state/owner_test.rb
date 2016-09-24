@@ -101,4 +101,13 @@ describe ObjectState::Owner do
       it { model.object_state.title.must_equal title.downcase }
     end
   end
+
+  describe 'multiple object_state blocks' do
+    let(:model) { MultipleObjectStateOwner.new }
+
+    describe '#object_state' do
+      it { model.object_state.must_respond_to :title }
+      it { model.object_state.must_respond_to :number }
+    end
+  end
 end

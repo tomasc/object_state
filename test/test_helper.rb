@@ -59,3 +59,16 @@ class CustomStateOwner
     field :title, type: String
   end
 end
+
+class MultipleObjectStateOwner
+  include Virtus.model(nullify_blank: true)
+  include ObjectState::Owner
+
+  object_state do
+    attribute :number, Integer
+  end
+
+  object_state do
+    attribute :title, String
+  end
+end
