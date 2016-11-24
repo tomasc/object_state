@@ -18,14 +18,14 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'activemodel', '>= 4', '<= 5'
-  spec.add_dependency 'activesupport', '>= 4', '<= 5'
+  spec.add_dependency 'activemodel', '>= 4'
+  spec.add_dependency 'activesupport', '>= 4'
   spec.add_dependency 'virtus'
 
-  spec.add_development_dependency 'bundler', '~> 1.12'
+  spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'guard'
   spec.add_development_dependency 'guard-minitest'
-  spec.add_development_dependency 'minitest', '~> 5.0'
-  spec.add_development_dependency 'mongoid', '>= 5.0', '< 6'
+  spec.add_development_dependency 'minitest'
+  spec.add_development_dependency 'mongoid', '>= 5.0'
   spec.add_development_dependency 'rake', '~> 10.0'
 end
