@@ -26,6 +26,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard'
   spec.add_development_dependency 'guard-minitest'
   spec.add_development_dependency 'minitest'
-  spec.add_development_dependency 'mongoid', '>= 5.0'
+  spec.add_development_dependency 'mongoid', '>= 5.0', '<= 7'
   spec.add_development_dependency 'rake', '~> 10.0'
 end
